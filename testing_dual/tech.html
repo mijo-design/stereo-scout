@@ -21,12 +21,19 @@
     <h1>Stereo Sound Test</h1>
     <button id="playPauseBtn">Play/Pause</button>
     <br />
+    <button id="fullLeft">Full Left</button>
+    <button id="center">Booth</button>
+    <button id="fullRight">Full Right</button>
+    <button id="auto">Auto</button>
+    <br />
     <label for="balanceSlider">Balance: </label>
     <input type="range" id="balanceSlider" min="-1" max="1" step="0.01" value="0">
     <audio id="leftChannel" src="urban-seattle_01_L.mp3"></audio>
     <audio id="rightChannel" src="urban-seattle_01_R.mp3"></audio>
     <script>
         let playing = false;
+        let autoMode = false;
+        let autoModeDirection = 1;
         const leftChannel = document.getElementById('leftChannel');
         const rightChannel = document.getElementById('rightChannel');
         const balanceSlider = document.getElementById('balanceSlider');
@@ -45,13 +52,64 @@
             }
         });
 
-        balanceSlider.addEventListener('input', () => {
+        function setBalance(value) {
+            balanceSlider.value = value;
+            adjustBalance();
+        }
+
+        function adjustBalance() {
             const balance = parseFloat(balanceSlider.value);
-            // Adjust volume based on balance
             leftChannel.volume = balance <= 0 ? 1 : 1 - balance;
             rightChannel.volume = balance >= 0 ? 1 : 1 + balance;
-        });
-    </script>
+        }
+
+        balanceSlider.addEventListener('input', adjustBalance);
+
+        document.getElementById('fullLeft').addEventListener('click', () => fadeBalance(-1));
+        document.getElementById('center').addEventListener('click', () => fadeBalance(0));
+        document.getElementById('fullRight').addEventListener('click', () => fadeBalance(1));
+        document.getElementById('auto').addEventListener('click', toggleAutoMode);
+
+        function fadeBalance(targetValue) {
+            if (autoMode) return; // Prevent manual fading when in auto mode
+
+            let currentValue = parseFloat(balanceSlider.value);
+            const step = targetValue > currentValue ? 0.01 : -0.01;
+
+            function fade() {
+                if ((step > 0 && currentValue < targetValue) || (step < 0 && currentValue > targetValue)) {
+                    currentValue += step;
+                    setBalance(currentValue.toFixed(2));
+                    requestAnimationFrame(fade);
+                }
+            }
+
+            fade();
+        }
+
+        function toggleAutoMode() {
+            autoMode = !autoMode;
+            if (autoMode) {
+                autoBalance();
+                document.getElementById('auto').textContent = 'Stop Auto';
+            } else {
+                document.getElementById('auto').textContent = 'Auto';
+            }
+        }
+
+        function autoBalance() {
+            if (!autoMode) return;
+
+            let currentValue = parseFloat(balanceSlider.value);
+            currentValue += 0.01 * autoModeDirection;
+
+            if (currentValue >= 1 || currentValue <= -1) {
+                autoModeDirection *= -1;
+            }
+
+            setBalance(currentValue.toFixed(2));
+            requestAnimationFrame(autoBalance);
+        }    </script>
 </body>
 
 </html>
