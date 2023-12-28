@@ -1,2 +1,71 @@
-<a href="testing/tech.html">Testing Audio Web Api</a>
-<a href="testing_dual/tech.html">Testing Dual Audio</a>
+<!--
+
+StereoScout is a online web app where you can test your headphones or speakers for stereo sound.
+It plays a song and you can choose the right and left channel to test if your speakers are placed correctly. 
+You can also test if audio is working and you hear the music.
+It uses the StereoPannerNode from AudioContext.
+
+It's free to use and without any download. Just open it in your browser and start testing.
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StereoScout: Online Stereo Sound Test for Headphones & Speakers</title>
+    <meta name="description" content="StereoScout is a user-friendly online tool designed to test the stereo sound of your headphones and speakers. Effortlessly check the balance and placement of your audio setup using our free web app. No downloads required - open in any browser and start testing with the StereoPannerNode feature from AudioContext. Ideal for audiophiles, music enthusiasts, and anyone looking to ensure their audio devices are functioning perfectly.">
+    <style>
+        body {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #slider {
+            width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Stereo Sound Test</h1>
+    <p>StereoScout is a free, browser-based tool for testing the stereo sound of your headphones and speakers. </p>
+    <audio src="urban-seattle_mono.mp3" controls></audio>
+    <br />
+    <label for="balanceSlider">Balance: </label>
+    <input type="range" id="balanceSlider" min="-1" max="1" step="0.01" value="0">
+
+    <a href="testing/tech.html">Testing Audio Web Api</a>
+    <a href="testing_dual/tech.html">Testing Dual Audio</a>
+    <script>
+        const audioElement = document.querySelector('audio');
+        const balanceSlider = document.getElementById('balanceSlider');
+        let loaded = false
+        audioElement.addEventListener("play", () => {
+            if (loaded) return
+            loaded = true
+
+            // for legacy browsers
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+
+            // get the audio element
+            const track = audioContext.createMediaElementSource(audioElement);
+
+            // create a StereoPannerNode
+            const stereoNode = new StereoPannerNode(audioContext, { pan: 0 });
+
+            // connect the nodes
+            track.connect(stereoNode).connect(audioContext.destination);
+
+            // event listener for the slider
+            balanceSlider.addEventListener('input', function () {
+                stereoNode.pan.value = balanceSlider.value;
+            });
+        });
+    </script>
+</body>
+
+</html>
