@@ -35,11 +35,19 @@ It's free to use and without any download. Just open it in your browser and star
     <audio src="urban-seattle_mono.mp3" controls></audio>
     <br />
     <label for="balanceSlider">Balance: </label>
+    <button onclick="setSliderValue(-1)">Left</button>
     <input type="range" id="balanceSlider" min="-1" max="1" step="0.01" value="0">
-
+    <button onclick="setSliderValue(1)">Right</button>
+    <br />
     <a href="testing/tech.html">Testing Audio Web Api</a>
     <a href="testing_dual/tech.html">Testing Dual Audio</a>
     <script>
+        function setSliderValue(value) {
+            var slider = document.getElementById('balanceSlider');
+            slider.value = value;
+            slider.dispatchEvent(new Event('change'));
+        }
+
         const audioElement = document.querySelector('audio');
         const balanceSlider = document.getElementById('balanceSlider');
         let loaded = false
@@ -61,7 +69,8 @@ It's free to use and without any download. Just open it in your browser and star
             track.connect(stereoNode).connect(audioContext.destination);
 
             // event listener for the slider
-            balanceSlider.addEventListener('input', function () {
+            balanceSlider.addEventListener('change', function () {
+                console.log("Balance slider event", balanceSlider.value);
                 stereoNode.pan.value = balanceSlider.value;
             });
         });
