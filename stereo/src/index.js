@@ -1,3 +1,10 @@
+// Additional variables for features
+let autoModeInterval; // Interval for automatic balance movement
+let autoDirection = 1; // 1 = right, -1 = left
+const autoModeSpeed = 18; // Speed for automatic balance movement, in milliseconds
+const autoModeStep = 0.01; // Step for automatic balance movement
+const transitionSpeed = 10; // Speed for smooth balance transition, lower value = faster
+
 // Get references to the UI elements
 const audioElement = document.querySelector('audio');
 
@@ -8,15 +15,18 @@ const playPauseButton = document.getElementById('playPauseButton');
 const leftSpeaker = document.getElementById('leftSpeaker');
 const rightSpeaker = document.getElementById('rightSpeaker');
 
+const autoModeCheckbox = document.getElementById('autoModeCheckbox');
+
 // Audio Context
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const track = audioCtx.createMediaElementSource(audioElement);
 const panner = audioCtx.createStereoPanner();
 track.connect(panner).connect(audioCtx.destination);
 
-// Event listeners
 balanceSlider.addEventListener('input', function () {
     panner.pan.value = this.value;
+    autoModeCheckbox.checked = false;
+    stopAutoMode()
 });
 
 volumeSlider.addEventListener('input', function () {
@@ -24,32 +34,84 @@ volumeSlider.addEventListener('input', function () {
 });
 
 leftSpeaker.addEventListener('click', function () {
-    setBalance(-1);
+    smoothTransition(-1);
+    autoModeCheckbox.checked = false;
+    stopAutoMode()
 });
 
 rightSpeaker.addEventListener('click', function () {
-    setBalance(1);
+    smoothTransition(1);
+    autoModeCheckbox.checked = false;
+    stopAutoMode()
 });
+
+function smoothTransition(targetValue) {
+    let currentValue = parseFloat(balanceSlider.value);
+    if (currentValue === targetValue) return;
+
+    let step = (targetValue - currentValue) / transitionSpeed;
+
+    function transition() {
+        currentValue += step;
+        if ((step > 0 && currentValue >= targetValue) || (step < 0 && currentValue <= targetValue)) {
+            setBalance(targetValue);
+            return;
+        }
+        setBalance(currentValue);
+        requestAnimationFrame(transition);
+    }
+
+    transition();
+}
 
 playPauseButton.addEventListener('click', function () {
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
+        if (autoModeCheckbox.checked) {
+            startAutoMode();
+        }
     }
 
     if (audioElement.paused) {
         audioElement.play();
+        if (autoModeCheckbox.checked) {
+            startAutoMode();
+        }
     } else {
         audioElement.pause();
+        stopAutoMode();
     }
 });
 
-// Set the initial values
-panner.pan.value = balanceSlider.value;
-audioElement.volume = volumeSlider.value;
+// Auto Mode feature
+autoModeCheckbox.addEventListener('change', function () {
+    if (this.checked && !audioElement.paused) {
+        startAutoMode();
+    } else {
+        stopAutoMode();
+    }
+});
 
+function startAutoMode() {
+    autoModeInterval = setInterval(() => {
+        let currentValue = parseFloat(balanceSlider.value);
+        let newValue = currentValue + autoDirection * autoModeStep;
+        if (newValue >= 1 || newValue <= -1) {
+            autoDirection *= -1;
+        }
+        setBalance(newValue);
+    }, autoModeSpeed);
+}
 
-// Helper
+function stopAutoMode() {
+    clearInterval(autoModeInterval);
+}
+
 function setBalance(value) {
     panner.pan.value = value;
     balanceSlider.value = value;
 }
+
+// Set the initial values
+panner.pan.value = balanceSlider.value;
+audioElement.volume = volumeSlider.value;
