@@ -126,6 +126,18 @@ document.body.onkeyup = function (e) {
     }
 }
 
+// const pageTitle = document.title;
+// document.addEventListener('visibilitychange', function (e) {
+//     const isPageActive = !document.hidden;
+//     const isMusicPlaying = !audioElement.paused;
+//     if (!isPageActive) {
+//         document.title = isMusicPlaying ? "🎧 " + pageTitle : pageTitle;
+//     } else {
+//         document.title = pageTitle;
+//     }
+// });
+
+
 // Set the initial values
 panner.pan.value = balanceSlider.value;
 audioElement.volume = volumeSlider.value;
