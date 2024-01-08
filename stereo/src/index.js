@@ -119,6 +119,13 @@ function setBalance(value) {
     balanceSlider.value = value;
 }
 
+// Space key to play/pause
+document.body.onkeyup = function (e) {
+    if (e.keyCode === 32) {
+        playPauseButton.click();
+    }
+}
+
 // Set the initial values
 panner.pan.value = balanceSlider.value;
 audioElement.volume = volumeSlider.value;
