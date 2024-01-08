@@ -102,8 +102,9 @@ function startAutoMode() {
     autoModeInterval = setInterval(() => {
         let currentValue = parseFloat(balanceSlider.value);
         let newValue = currentValue + autoDirection * autoModeStep;
-        if (newValue >= 1 || newValue <= -1) {
+        if (newValue > 1 || newValue < -1) {
             autoDirection *= -1;
+            newValue = currentValue + autoDirection * autoModeStep
         }
         setBalance(newValue);
     }, autoModeSpeed);
