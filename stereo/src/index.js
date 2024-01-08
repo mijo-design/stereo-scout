@@ -4,6 +4,13 @@ let autoDirection = 1; // 1 = right, -1 = left
 const autoModeSpeed = 18; // Speed for automatic balance movement, in milliseconds
 const autoModeStep = 0.01; // Step for automatic balance movement
 const transitionSpeed = 10; // Speed for smooth balance transition, lower value = faster
+const i18n = {
+    en: {
+        start: 'Start',
+        stop: 'Stop',
+    }
+}
+const defaultLang = 'en';
 
 // Get references to the UI elements
 const audioElement = document.querySelector('audio');
@@ -67,18 +74,17 @@ function smoothTransition(targetValue) {
 playPauseButton.addEventListener('click', function () {
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
-        if (autoModeCheckbox.checked) {
-            startAutoMode();
-        }
     }
 
     if (audioElement.paused) {
         audioElement.play();
+        playPauseButton.textContent = i18n[defaultLang].stop;
         if (autoModeCheckbox.checked) {
             startAutoMode();
         }
     } else {
         audioElement.pause();
+        playPauseButton.textContent = i18n[defaultLang].start;
         stopAutoMode();
     }
 });
